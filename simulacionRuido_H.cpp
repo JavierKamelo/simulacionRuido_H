@@ -11,7 +11,7 @@ const int Lx=90;
 const int Ly=90;
 const int Lz=40;
 float H; 
-const float dH=0.1;
+const float dH=0.001;
 const float Hmin=0.0;
 const float Hmax=2;
 const float ax=0.5;
@@ -28,19 +28,17 @@ public:
   void Imprimase(const char * NombreArchivo);
 };
 
-void Ruido::Cargue(void){
+void Ruido::Cargue(void) // Aisgna a cada punto del espacio el valor complejo del Ruido
+{
   int i,j,k;
-  //complex<float> kk (8, 0);
-   
+     
    
     for (i=0; i<Lx; i++){
         for (j=0; j<Ly-1; j++){
             for(k=0; k<Lz; k++){
                 
                
-                Ux[i][j][k]=complex<float>(cosf(0.5*H*ax*ay*(-Ly/2.+j-1.)),sinf(0.5*H*ax*ay*(-Ly/2.+j-1.)));
-                //if (real(Ux[i][j][k])> -0.6 && real(Ux[i][j][k])< 0.6) Ux[i][j][k]= Ux[i][j][k] + kk;
-                
+                Ux[i][j][k]=complex<float>(cosf(0.5*H*ax*ay*(-Ly/2.+j-1.))+cosf(0.5*H*ax*ay*(-Lx/2.+i-1.))+1,sinf(0.5*H*ax*ay*(-Ly/2.+j-1.))-sinf(0.5*H*ax*ay*(-Lx/2.+i-1.))); // Ruido total sumado en x,y,z                          
                
             } 
         }
@@ -48,7 +46,7 @@ void Ruido::Cargue(void){
 
 }
 //----------------------------------------------------------------------------------------------------------------
-//  Crea Achivos .dat con los datos a graficar  
+//  Crea un achivo .dat con los datos a graficar 
 //-----------------------------------------------------------------------------------------------------------------
 
 void Ruido::Imprimase(const char * NombreArchivo){
@@ -57,11 +55,12 @@ void Ruido::Imprimase(const char * NombreArchivo){
     
     for(i=0;i<Lx;i++){
         for(j=0;j<Ly;j++){
-          for(k=0; k<Lz; k++){
-            
+          for(k=0; k<Lz; k++)
+          {
                 //rho0=rho(ix,iy,false);
-                MiArchivo<<" "<<i<<" "<<j<<" "<<k<<" "<< real(Ux[i][j][k])   <<endl;
-          }     
+                //MiArchivo<<" "<<i<<" "<<j<<" "<<k<<" "<< imag(Ux[i][j][k])   <<endl;
+               MiArchivo<<" "<<i<<" "<<j<<" "<<k<<" "<< real(Ux[i][j][k])   <<endl;
+          }
         }
     MiArchivo<<endl;
     }
@@ -93,6 +92,8 @@ void convIntEnChar(int entero, char cadenaTemp [5])
    
 }
 //**********************************************************************************************************************
+// Crea una imagen .png con el consecutivo que viene del argumeto este va desde 0000 hata 9999
+//************************************************************************************************
 void graficar(char ordenCuadro[5])
 {
   char plotIni[100]="splot 'datos_";
@@ -111,16 +112,18 @@ void graficar(char ordenCuadro[5])
   cout<<"set vxrange [0:100]; set vyrange [0:100]; set vzrange [0:100]"<<endl ;
   cout<<"set xrange [0:100]; set yrange [0:100]; set zrange [0:100]" <<endl;
   cout<<"set pm3d"<<endl;
-  cout<<"set cbrange [-1.2:1.3]"<<endl;
+  cout<<"set cbrange [-2.2:3.2]"<<endl;
   cout<<"set ylabel \"y\""<<endl;
   cout<<"set xlabel \"x\""<<endl;
   cout<<"set zlabel \"z\""<<endl;
-  cout<<"set title \"Ruido Dependiente de H [0,2] \""<<endl;
+  cout<<"set title \"Ruido Dependiente de H [0,2] parte Real\""<<endl;
   cout<<"set key noautotitle"<<endl;
   cout<<plotIni<<endl;
 
 }
-
+//----------------------------------------------------------------------------
+//Rutina para generar una serie de imagenes para luego crear un gif con ellas
+//----------------------------------------------------------------------------
 int main(void){
 Ruido Fondo;
 int m=0;
